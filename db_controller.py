@@ -1,3 +1,6 @@
+'''Модуль содержит функции, изменяющие структуру или наполнение БД'''
+
+
 import sqlite3
 
 
@@ -18,6 +21,41 @@ def create_some_db():
                         )''')
 
 
+def create_fertilizers_table():
+    '''Конструктор таблицы удобрений для garden.db'''
+    conn = sqlite3.connect('garden.db', isolation_level=None)
+
+    with conn:
+        cur = conn.cursor()
+
+        cur.execute('''CREATE TABLE IF NOT EXISTS fertilizers (
+                        id INTEGER PRIMARY KEY,
+                        name TEXT,
+                        amount INTEGER
+                        )''')
+
+
+def create_crops_table():
+    '''Конструктор таблицы культур для garden.db'''
+    conn = sqlite3.connect('garden.db', isolation_level=None)
+
+    with conn:
+        cur = conn.cursor()
+
+        cur.execute('''CREATE TABLE IF NOT EXISTS crops (
+                        id INTEGER PRIMARY KEY,
+                        name TEXT,
+                        season TEXT,
+                        watering_frequency INTEGER,
+                        ripening_period INTEGER
+                        )''')
+
+
+def create_garden_db():
+    '''Создаёт базу данных garden.db с таблицами: удобрения, культуры'''
+    create_fertilizers_table()
+    create_crops_table()
+
 def copy_db(old_db_file, new_db_file):
     '''Создаём «песочницу» — копию базы данных с незаполненными таблицами'''
     con = sqlite3.connect(old_db_file, isolation_level=None)
@@ -27,17 +65,17 @@ def copy_db(old_db_file, new_db_file):
         con.backup(bck)
 
 
-def insert_to_db(db_file, table, data_array):
+def insert_to_db(db_file, table, data_list):
     '''Вставляем данные в таблицу базы данных'''
     conn = sqlite3.connect(db_file, isolation_level=None)
 
     with conn:
         cursor = conn.cursor()
 
-        if isinstance(data_array[0], int): # Если подали одну строку
-            cursor.execute("""INSERT INTO {table} VALUES {data};""".format(table=table, data=tuple(data_array)))
+        if isinstance(data_list[0], int): # Если подали одну строку
+            cursor.execute("""INSERT INTO {table} VALUES {data};""".format(table=table, data=tuple(data_list)))
         else: # Если подали несколько строк
-            for data in data_array:
+            for data in data_list:
                 cursor.execute("""INSERT INTO {table} VALUES {data};""".format(table=table, data=tuple(data)))
 
 
@@ -50,12 +88,12 @@ def clear_table(db_file, table):
         cursor.execute('''DELETE FROM {table};'''.format(table=table))
 
 
-def raplase_table_data(db_file, table, data_array):
-    '''Заменяет все данные таблицы на data_array'''
+def raplase_table_data(db_file, table, data_list):
+    '''Заменяет все данные таблицы на data_list'''
     clear_table(db_file, table)
-    insert_to_db(db_file, table, data_array)
+    insert_to_db(db_file, table, data_list)
 
 
 if __name__ == '__main__':
-    # create_some_db()
+    create_garden_db()
     pass
