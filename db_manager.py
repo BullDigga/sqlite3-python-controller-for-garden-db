@@ -1,7 +1,5 @@
 '''Данный модуль содержит функции, анализирующие работу с БД'''
 
-
-
 import timeit
 import matplotlib.pyplot as plt
 
@@ -28,22 +26,16 @@ def generate_data_dependency(table, row_count):
     data = []
     time_list = []
     num_rows_list = []
-    if table == 'fertilizers':
-        for i in range(row_count):
-            start_time = timeit.default_timer()
-            for _ in range(i):
+    for i in range(row_count):
+        start_time = timeit.default_timer()
+        for _ in range(i):
+            if table == 'fertilizers':
                 data.append(new_random_fertilizer())
-            end_time = timeit.default_timer()
-            num_rows_list.append(i)
-            time_list.append(end_time - start_time)
-    elif table == 'crops':
-        for i in range(row_count):
-            start_time = timeit.default_timer()
-            for _ in range(i):
+            elif table == 'crops':
                 data.append(new_random_crop())
-            end_time = timeit.default_timer()
-            num_rows_list.append(i)
-            time_list.append(end_time - start_time)
+        end_time = timeit.default_timer()
+        num_rows_list.append(i)
+        time_list.append(end_time - start_time)
 
     plt.plot(num_rows_list, time_list, marker='o')
     plt.title('Время генерации данных в зависимости от их количества')
@@ -57,22 +49,20 @@ def execute_dependency(db_name, query, row_count):
     '''Функция для построения графика зависимости времени выполнения запросов в зависимости от количества строк в таблице'''
     query_times = []
     num_rows_list = []
-    if table == 'fertilizers':
-        for i in range(row_count):
-            start_time = timeit.default_timer()
-            execute_query(db_name, query)
-            end_time = timeit.default_timer()
+    for i in range(1, row_count, 500):
+        clear_table(db_name, 'fertilizers')
+        clear_table(db_name, 'crops')
+        fertilizers = [(j, ) + new_random_fertilizer() for j in range(i)]
+        insert_to_db(db_name, 'fertilizers', fertilizers)
+        crops = [(j, ) + new_random_crop() for j in range(i)]
+        insert_to_db(db_name, 'crops', crops)
 
-            num_rows_list.append(i)
-            query_times.append(end_time - start_time)
-    elif table == 'crops':
-        for i in range(row_count):
-            start_time = timeit.default_timer()
-            execute_query(db_name, query)
-            end_time = timeit.default_timer()
+        start_time = timeit.default_timer()
+        execute_query(db_name, query)
+        end_time = timeit.default_timer()
 
-            num_rows_list.append(i)
-            query_times.append(end_time - start_time)
+        num_rows_list.append(i)
+        query_times.append(end_time - start_time)
 
     plt.plot(num_rows_list, query_times, marker='o')
     plt.title('Время выполнения запросов в зависимости от количества строк в таблице')
@@ -87,18 +77,7 @@ if __name__ == '__main__':
     table = 'fertilizers'
     clear_table(db_name, table)
 
-    # data_list = [
-    #     [(i,) + tuple(new_random_fertilizer()) for i in range(1, 101)],
-    #     [(i,) + tuple(new_random_fertilizer()) for i in range(101, 301)],
-    #     [(i,) + tuple(new_random_fertilizer()) for i in range(301, 1001)],
-    #     [(i,) + tuple(new_random_fertilizer()) for i in range(1001, 5001)],
-    #     [(i,) + tuple(new_random_fertilizer()) for i in range(5001, 10001)],
-    #     [(i,) + tuple(new_random_fertilizer()) for i in range(10001, 20001)],
-    # ]
-    #
-    # insert_and_plot_data(db_name, table, data_list)
-
-    # generate_data_dependency(table, 100)
+    # generate_data_dependency(table, 5000)
 
     query = 'SELECT * FROM fertilizers'
-    execute_dependency(db_name, query, 20000)
+    execute_dependency(db_name, query, 10000)
