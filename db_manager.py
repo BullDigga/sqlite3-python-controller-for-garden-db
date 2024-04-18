@@ -50,8 +50,7 @@ def execute_dependency(db_name, query, row_count):
     query_times = []
     num_rows_list = []
     for i in range(1, row_count, 500):
-        clear_table(db_name, 'fertilizers')
-        clear_table(db_name, 'crops')
+        clear_tables()
         fertilizers = [(j, ) + new_random_fertilizer() for j in range(i)]
         insert_to_db(db_name, 'fertilizers', fertilizers)
         crops = [(j, ) + new_random_crop() for j in range(i)]
@@ -74,8 +73,6 @@ def execute_dependency(db_name, query, row_count):
 
 if __name__ == '__main__':
     db_name = 'garden.db'
-    table = 'fertilizers'
-    clear_table(db_name, table)
 
     # generate_data_dependency(table, 5000)
 

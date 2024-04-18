@@ -2,6 +2,8 @@
 
 import sqlite3
 
+from randomik import *
+
 
 def create_some_db():
     '''Конструктор баз данных. Для использования нужно менять тело функции'''
@@ -86,6 +88,15 @@ def clear_table(db_file, table):
         cursor = conn.cursor()
         cursor.execute('''DELETE FROM {table};'''.format(table=table))
 
+def clear_tables():
+    '''Очищает таблицы «fertilizer» и «crops» в базе данных «garden.db».
+    Также обнуляет статические переменные ID в функциях «new_random_fertilizer» и «new_random_crop»'''
+    clear_table('garden.db', 'fertilizers')
+    clear_table('garden.db', 'crops')
+
+    new_random_fertilizer.id_count = 0
+    new_random_crop.id_count = 0
+
 
 def raplase_table_data(db_file, table, data_list):
     '''Заменяет все данные таблицы на data_list'''
@@ -95,4 +106,9 @@ def raplase_table_data(db_file, table, data_list):
 
 if __name__ == '__main__':
     create_garden_db()
+    data = new_random_crops(20)
+    insert_to_db('garden.db', 'crops', data)
+    clear_tables()
+    data = new_random_crops(30)
+    insert_to_db('garden.db', 'crops', data)
     pass
