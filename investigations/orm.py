@@ -30,10 +30,19 @@ class IntegerField(Field):
     Класс, представляющий поле с целочисленным значением в таблице базы данных.
 
     Наследуется от Field.
+
+    Атрибуты
+    --------
+    min_value : int
+        минимальное значение (по умолчанию None)
+    max_value : int
+        максимальное значение (по умолчанию None)
     """
 
-    def __init__(self, primary_key=False):
+    def __init__(self, primary_key=False, min_value=None, max_value=None):
         super().__init__('INT', primary_key)
+        self.min_value = min_value
+        self.max_value = max_value
 
 
 class StringField(Field):
@@ -48,8 +57,9 @@ class StringField(Field):
         максимальная длина строки (по умолчанию 255)
     """
 
-    def __init__(self, max_length=255):
+    def __init__(self, max_length=255, choices=None):
         super().__init__(f'VARCHAR({max_length})')
+        self.choices = choices
 
 
 class ForeignKey(Field):
@@ -95,11 +105,21 @@ class ModelMeta(type):
 
                 column_name = parts[0].strip()
                 column_type = parts[1].strip().lower()
+
                 if column_type.startswith('charfield'):
-                    max_length = int(parts[2].split('=')[1]) if len(parts) > 2 else 255
-                    columns[column_name] = StringField(max_length=max_length)
+                    max_length = int(parts[2].split('=')[1]) if len(parts) > 2 and 'max_length' in parts[2] else 255
+                    choices = None
+                    if len(parts) > 3 and 'choices' in parts[3]:
+                        choices = parts[3].split('=')[1].strip().replace("'", "").split(',')
+                    columns[column_name] = StringField(max_length=max_length, choices=choices)
                 elif column_type == 'integerfield':
-                    columns[column_name] = IntegerField()
+                    min_value = None
+                    max_value = None
+                    if len(parts) > 2 and 'min' in parts[2]:
+                        min_value = int(parts[2].split('=')[1].strip())
+                    if len(parts) > 3 and 'max' in parts[3]:
+                        max_value = int(parts[3].split('=')[1].strip())
+                    columns[column_name] = IntegerField(min_value=min_value, max_value=max_value)
                 elif column_type == 'foreignkey':
                     reference_table = parts[2].split('=')[1].strip() if len(parts) > 2 else None
                     columns[column_name] = ForeignKey(reference_table=reference_table)
@@ -269,7 +289,43 @@ class Crop(Model):
         self.watering_frequency = watering_frequency
         self.ripening_period = ripening_period
 
+    @classmethod
+    def create_table(cls, min_watering_frequency=None, max_watering_frequency=None, possible_seasons=None):
+        """
+        Создает таблицу базы данных для модели Crop с учетом ограничений частоты полива и возможных сезонов.
+
+        Параметры
+        ---------
+        min_watering_frequency : int, optional
+            Минимальное значение частоты полива.
+        max_watering_frequency : int, optional
+            Максимальное значение частоты полива.
+        possible_seasons : list of str, optional
+            Список допустимых сезонов для атрибута season.
+        """
+        cls.min_watering_frequency = min_watering_frequency
+        cls.max_watering_frequency = max_watering_frequency
+        cls.possible_seasons = possible_seasons
+        super().create_table()
+
     def save(self):
+        """
+        Сохраняет экземпляр культуры в базе данных.
+
+        Поддерживает проверку ограничений, определенных при создании таблицы,
+        а также обязательное значение для атрибута season, если possible_seasons задано.
+        """
+        # Проверяем, что значение season соответствует одному из допустимых значений, если они заданы
+        if self.possible_seasons is not None:
+            if self.season not in self.possible_seasons:
+                raise ValueError(f"Сезон выращивания должен быть одним из: {', '.join(self.possible_seasons)}")
+
+        # Проверяем, что значение watering_frequency соответствует заданным ограничениям
+        if self.watering_frequency is not None:
+            if (self.min_watering_frequency is not None and self.watering_frequency < self.min_watering_frequency) or \
+               (self.max_watering_frequency is not None and self.watering_frequency > self.max_watering_frequency):
+                raise ValueError(f"Значение частоты полива должно быть между {self.min_watering_frequency} и {self.max_watering_frequency}")
+
         query = "INSERT INTO crops (name, season, watering_frequency, ripening_period) VALUES (%s, %s, %s, %s)"
         values = (self.name, self.season, self.watering_frequency, self.ripening_period)
         with create_connection('garden') as connection:
@@ -281,6 +337,7 @@ class Crop(Model):
                         print("Crop saved successfully")
                 except Error as e:
                     print(f"The error '{e}' occurred")
+
 
 class Employee(Model):
     """
@@ -382,11 +439,13 @@ if __name__ == "__main__":
         fertilizer.save()
 
     # Создание таблицы для модели Crop
-    Crop.create_table()
+    Crop.create_table(min_watering_frequency=1, max_watering_frequency=40, possible_seasons=['лето', 'осень', 'весна'])
     for _ in range(2):
         crop_data = new_random_crop()
         crop = Crop(*crop_data)
         crop.save()
+    crop = Crop(name='Пшеница', season='лето', watering_frequency=3, ripening_period=50)
+    crop.save()
 
     # Создание таблицы для модели Employee
     Employee.create_table()
