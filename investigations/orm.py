@@ -399,7 +399,6 @@ class Garden(Model):
                 except Error as e:
                     print(f"The error '{e}' occurred")
 
-
 class Action(Model):
     """
     Класс, представляющий действие в саду.
@@ -430,42 +429,75 @@ class Action(Model):
                     print(f"The error '{e}' occurred")
 
 
+# В файле orm.py
+
+def generate(model, n):
+    """
+    Генерирует n экземпляров заданного класса model.
+
+    Параметры
+    ----------
+    model : type
+        Класс модели для генерации экземпляров.
+    n : int
+        Количество экземпляров для создания.
+
+    Возвращает
+    ----------
+    list
+        Список экземпляров заданного класса.
+    """
+    if model == Crop:
+        return [Crop(*new_random_crop()) for _ in range(n)]
+    elif model == Fertilizer:
+        return [Fertilizer(*new_random_fertilizer()) for _ in range(n)]
+    elif model == Garden:
+        return [Garden(new_random_garden()) for _ in range(n)]
+    elif model == Action:
+        return [Action(new_random_action()) for _ in range(n)]
+    elif model == Employee:
+        return [Employee(*new_random_employee()) for _ in range(n)]
+    else:
+        raise ValueError("Неверный класс модели")
+
+# Пример использования для действий:
+
+if __name__ == '__main__':
+    actions = generate(Action, 10)
+    for action in actions:
+        action.save()
+
+
 if __name__ == "__main__":
     # Создание таблицы для модели Fertilizer
     Fertilizer.create_table()
-    for _ in range(2):
-        fertilizer_data = new_random_fertilizer()
-        fertilizer = Fertilizer(*fertilizer_data)
+    fertilizers = generate(Fertilizer, 10)
+    for fertilizer in fertilizers:
         fertilizer.save()
 
+
     # Создание таблицы для модели Crop
-    Crop.create_table(min_watering_frequency=1, max_watering_frequency=40, possible_seasons=['лето', 'осень', 'весна'])
-    for _ in range(2):
-        crop_data = new_random_crop()
-        crop = Crop(*crop_data)
+    Crop.create_table(min_watering_frequency=1, max_watering_frequency=40, possible_seasons=['лето', 'осень', 'весна', 'зима'])
+    crops = generate(Crop, 10)
+    for crop in crops:
         crop.save()
-    crop = Crop(name='Пшеница', season='лето', watering_frequency=3, ripening_period=50)
-    crop.save()
 
     # Создание таблицы для модели Employee
     Employee.create_table()
-    for _ in range(2):
-        employee_data = new_random_employee()
-        employee = Employee(*employee_data)
+    employees = generate(Employee, 10)
+    for employee in employees:
         employee.save()
 
     # Создание таблицы для модели Garden
     Garden.create_table()
-    for _ in range(2):
-        garden_data = new_random_garden()
-        garden = Garden(garden_data)
+    gardens = generate(Garden, 10)
+    for garden in gardens:
         garden.save()
 
     # Создание таблицы для модели Action
     Action.create_table()
-    for _ in range(2):
-        action_data = new_random_action()
-        action = Action(action_data)
+    actions = generate(Action, 10)
+    for action in actions:
         action.save()
 
     show_database_content()
