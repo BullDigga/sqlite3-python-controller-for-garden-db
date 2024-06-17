@@ -384,7 +384,8 @@ def execute_query(query):
 
 
 def drop_tables():
-    tables = ['fertilizers', 'fertilizer', 'crops', 'crop', 'employees', 'employee', 'gardens', 'garden', 'actions', 'action', 'garden_employee']
+    tables = ['fertilizers', 'fertilizer', 'crops', 'crop', 'gardenemployee', 'gardens_employees',
+              'employees', 'employee', 'gardens', 'garden', 'actions', 'action', 'garden_employee']
     drop_table_query = "DROP TABLE IF EXISTS {}"
 
     with create_connection('garden') as conn:
@@ -402,5 +403,5 @@ def drop_tables():
 if __name__ == '__main__':
     # drop_tables()
     create_garden_db()
-    # clear_tables()
+    clear_tables()
     show_database_info()

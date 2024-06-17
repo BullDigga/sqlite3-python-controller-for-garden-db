@@ -2,8 +2,10 @@ import sys
 import os
 from mysql.connector import Error
 from lib.db_controller import create_connection, MySQLCursorManager
+from lib.randomik import *
+from db_manager import show_database_content
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 class Field:
@@ -226,49 +228,89 @@ class Fertilizer(Model):
             количество доступного удобрения
     """
 
-    id = IntegerField(primary_key=True)
-    name = StringField(max_length=255)
-    amount = IntegerField()
+    def __init__(self, name=None, amount=None):
+        self.name = name
+        self.amount = amount
+
+    def save(self):
+        query = "INSERT INTO fertilizers (name, amount) VALUES (%s, %s)"
+        values = (self.name, self.amount)
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(query, values)
+                        connection.commit()
+                        print("Fertilizer saved successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
 
 
 class Crop(Model):
     """
     Класс, представляющий культуру.
 
-    Наследуется от Model.
-
     :Attributes:
         id: IntegerField
             первичный ключ культуры
         name: StringField
             название культуры
-        plant_date: StringField
-            дата посадки культуры
+        season: StringField
+            сезон выращивания культуры
+        watering_frequency: IntegerField
+            частота полива культуры
+        ripening_period: IntegerField
+            срок созревания культуры
     """
 
-    id = IntegerField(primary_key=True)
-    name = StringField(max_length=255)
-    plant_date = StringField(max_length=255)
+    def __init__(self, name=None, season=None, watering_frequency=None, ripening_period=None):
+        self.name = name
+        self.season = season
+        self.watering_frequency = watering_frequency
+        self.ripening_period = ripening_period
 
+    def save(self):
+        query = "INSERT INTO crops (name, season, watering_frequency, ripening_period) VALUES (%s, %s, %s, %s)"
+        values = (self.name, self.season, self.watering_frequency, self.ripening_period)
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(query, values)
+                        connection.commit()
+                        print("Crop saved successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
 
 class Employee(Model):
     """
     Класс, представляющий сотрудника.
-
-    Наследуется от Model.
 
     :Attributes:
         id: IntegerField
             первичный ключ сотрудника
         fullname: StringField
             полное имя сотрудника
-        position: StringField
+        post: StringField
             должность сотрудника
     """
 
-    id = IntegerField(primary_key=True)
-    fullname = StringField(max_length=255)
-    position = StringField(max_length=255)
+    def __init__(self, fullname=None, post=None):
+        self.fullname = fullname
+        self.post = post
+
+    def save(self):
+        query = "INSERT INTO employees (fullname, post) VALUES (%s, %s)"
+        values = (self.fullname, self.post)
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(query, values)
+                        connection.commit()
+                        print("Employee saved successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
 
 
 class Garden(Model):
@@ -284,8 +326,21 @@ class Garden(Model):
             название сада
     """
 
-    id = IntegerField(primary_key=True)
-    name = StringField(max_length=255)
+    def __init__(self, name=None):
+        self.name = name
+
+    def save(self):
+        query = "INSERT INTO gardens (name) VALUES (%s)"
+        values = (self.name,)
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(query, values)
+                        connection.commit()
+                        print("Garden saved successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
 
 
 class Action(Model):
@@ -297,26 +352,61 @@ class Action(Model):
     :Attributes:
         id: IntegerField
             первичный ключ действия
-        description: StringField
+        name: StringField
             описание действия
     """
 
-    id = IntegerField(primary_key=True)
-    description = StringField(max_length=255)
+    def __init__(self, name=None):
+        self.name = name
+
+    def save(self):
+        query = "INSERT INTO actions (name) VALUES (%s)"
+        values = (self.name,)
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(query, values)
+                        connection.commit()
+                        print("Action saved successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
 
 
 if __name__ == "__main__":
     # Создание таблицы для модели Fertilizer
     Fertilizer.create_table()
+    for _ in range(2):
+        fertilizer_data = new_random_fertilizer()
+        fertilizer = Fertilizer(*fertilizer_data)
+        fertilizer.save()
 
     # Создание таблицы для модели Crop
     Crop.create_table()
+    for _ in range(2):
+        crop_data = new_random_crop()
+        crop = Crop(*crop_data)
+        crop.save()
 
     # Создание таблицы для модели Employee
     Employee.create_table()
+    for _ in range(2):
+        employee_data = new_random_employee()
+        employee = Employee(*employee_data)
+        employee.save()
 
     # Создание таблицы для модели Garden
     Garden.create_table()
+    for _ in range(2):
+        garden_data = new_random_garden()
+        garden = Garden(garden_data)
+        garden.save()
 
     # Создание таблицы для модели Action
     Action.create_table()
+    for _ in range(2):
+        action_data = new_random_action()
+        action = Action(action_data)
+        action.save()
+
+    show_database_content()
