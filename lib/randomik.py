@@ -12,16 +12,12 @@ def generate_random_string(length):
 
 def new_random_fertilizer():
     '''Возвращает случайное удобрение (ID, название и количество)'''
-    if not hasattr(new_random_fertilizer, "id_count"):
-        new_random_fertilizer.id_count = 0
-    new_random_fertilizer.id_count += 1
-
     new_name_len = random.randint(4, 10)
     new_name = generate_random_string(new_name_len)
 
     new_count = random.randint(0, 100)
 
-    return new_random_fertilizer.id_count, new_name, new_count
+    return new_name, new_count
 
 
 def new_random_fertilizers(count):
@@ -32,10 +28,6 @@ def new_random_fertilizers(count):
 
 def new_random_crop():
     '''Возвращает случайную культуру (ID, название, сезон, частота полива, срок созревания)'''
-    if not hasattr(new_random_crop, "id_count"):
-        new_random_crop.id_count = 0
-    new_random_crop.id_count += 1
-
     new_name_len = random.randint(4, 10)
     new_name = generate_random_string(new_name_len)
 
@@ -46,7 +38,7 @@ def new_random_crop():
 
     new_ripening_period = random.randint(10, 60)
 
-    return new_random_crop.id_count, new_name, new_season, new_watering_frequency, new_ripening_period
+    return new_name, new_season, new_watering_frequency, new_ripening_period
 
 
 def new_random_crops(count):
@@ -57,10 +49,6 @@ def new_random_crops(count):
 
 def new_random_employee():
     '''Возвращает случайного сотрудника (ID, ФИО, должность)'''
-    if not hasattr(new_random_employee, "id_count"):
-        new_random_employee.id_count = 0
-    new_random_employee.id_count += 1
-
     new_name_len = random.randint(4, 10)
     new_name = generate_random_string(new_name_len)
 
@@ -75,7 +63,7 @@ def new_random_employee():
     new_post_len = random.randint(4, 10)
     new_post= generate_random_string(new_post_len)
 
-    return new_random_employee.id_count, new_fullname, new_post
+    return new_fullname, new_post
 
 
 def new_random_employees(count):
@@ -86,14 +74,10 @@ def new_random_employees(count):
 
 def new_random_garden():
     '''Возвращает случайный сад (ID, название сада)'''
-    if not hasattr(new_random_garden, "id_count"):
-        new_random_garden.id_count = 0
-    new_random_garden.id_count += 1
-
     new_name_len = random.randint(4, 10)
     new_name = 'Сад ' + generate_random_string(new_name_len)
 
-    return new_random_garden.id_count, new_name
+    return new_name
 
 
 def new_random_gardens(count):
@@ -104,14 +88,10 @@ def new_random_gardens(count):
 
 def new_random_action():
     '''Возвращает случайное действие (ID, название действия)'''
-    if not hasattr(new_random_action, "id_count"):
-        new_random_action.id_count = 0
-    new_random_action.id_count += 1
-
     new_name_len = random.randint(4, 10)
     new_name = generate_random_string(new_name_len)
 
-    return new_random_action.id_count, new_name
+    return new_name
 
 
 def new_random_actions(count):
