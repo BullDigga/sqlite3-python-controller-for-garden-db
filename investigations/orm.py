@@ -3,6 +3,7 @@ import os
 from mysql.connector import Error
 from lib.db_controller import create_connection, MySQLCursorManager
 from lib.randomik import *
+from lib.generators import *
 from db_manager import show_database_content
 
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -428,9 +429,6 @@ class Action(Model):
                 except Error as e:
                     print(f"The error '{e}' occurred")
 
-
-# В файле orm.py
-
 def generate(model, n):
     """
     Генерирует n экземпляров заданного класса model.
@@ -448,56 +446,48 @@ def generate(model, n):
         Список экземпляров заданного класса.
     """
     if model == Crop:
-        return [Crop(*new_random_crop()) for _ in range(n)]
+        return list(generator_random_crop(n))
     elif model == Fertilizer:
-        return [Fertilizer(*new_random_fertilizer()) for _ in range(n)]
+        return list(generator_random_fertilizer(n))
     elif model == Garden:
-        return [Garden(new_random_garden()) for _ in range(n)]
+        return list(generator_random_garden(n))
     elif model == Action:
-        return [Action(new_random_action()) for _ in range(n)]
+        return list(generator_random_action(n))
     elif model == Employee:
-        return [Employee(*new_random_employee()) for _ in range(n)]
+        return list(generator_random_employee(n))
     else:
         raise ValueError("Неверный класс модели")
 
-# Пример использования для действий:
-
+# Пример использования:
 if __name__ == '__main__':
-    actions = generate(Action, 10)
-    for action in actions:
-        action.save()
-
-
-if __name__ == "__main__":
-    # Создание таблицы для модели Fertilizer
-    Fertilizer.create_table()
-    fertilizers = generate(Fertilizer, 10)
-    for fertilizer in fertilizers:
-        fertilizer.save()
-
-
-    # Создание таблицы для модели Crop
-    Crop.create_table(min_watering_frequency=1, max_watering_frequency=40, possible_seasons=['лето', 'осень', 'весна', 'зима'])
+    Crop.create_table()
     crops = generate(Crop, 10)
-    for crop in crops:
+    for crop_params in crops:
+        crop = Crop(*crop_params)
         crop.save()
 
-    # Создание таблицы для модели Employee
-    Employee.create_table()
-    employees = generate(Employee, 10)
-    for employee in employees:
-        employee.save()
+    Fertilizer.create_table()
+    fertilizers = generate(Fertilizer, 10)
+    for fertilizer_params in fertilizers:
+        fertilizer = Fertilizer(*fertilizer_params)
+        fertilizer.save()
 
-    # Создание таблицы для модели Garden
     Garden.create_table()
     gardens = generate(Garden, 10)
-    for garden in gardens:
+    for garden_params in gardens:
+        garden = Garden(garden_params)
         garden.save()
 
-    # Создание таблицы для модели Action
     Action.create_table()
     actions = generate(Action, 10)
-    for action in actions:
+    for action_params in actions:
+        action = Action(action_params)
         action.save()
+
+    Employee.create_table()
+    employees = generate(Employee, 10)
+    for employee_params in employees:
+        employee = Employee(*employee_params)
+        employee.save()
 
     show_database_content()
