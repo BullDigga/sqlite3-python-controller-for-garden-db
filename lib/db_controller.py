@@ -1,4 +1,8 @@
 import mysql.connector
+import subprocess
+import datetime
+import os
+
 from mysql.connector import Error
 from lib.randomik import *
 
@@ -64,9 +68,9 @@ def create_database(db_name):
                 print(f"Error: '{e}'")
 
 
-def create_fertilizers_table():
+def create_fertilizers_table(db_name='garden'):
     '''Конструктор таблицы удобрений для garden'''
-    with create_connection('garden') as conn:
+    with create_connection(db_name) as conn:
         if conn:
             try:
                 with MySQLCursorManager(conn) as cur:
@@ -75,14 +79,14 @@ def create_fertilizers_table():
                                     name VARCHAR(255),
                                     amount INT
                                     )''')
-                    print("Table 'fertilizers' created successfully")
+                    print(f"Table 'fertilizers' in database '{db_name}' created successfully")
             except Error as e:
                 print(f"Error: '{e}'")
 
 
-def create_crops_table():
+def create_crops_table(db_name='garden'):
     '''Конструктор таблицы культур для garden'''
-    with create_connection('garden') as conn:
+    with create_connection(db_name) as conn:
         if conn:
             try:
                 with MySQLCursorManager(conn) as cur:
@@ -93,14 +97,14 @@ def create_crops_table():
                                     watering_frequency INT,
                                     ripening_period INT
                                     )''')
-                    print("Table 'crops' created successfully")
+                    print(f"Table 'crops' in database '{db_name}' created successfully")
             except Error as e:
                 print(f"Error: '{e}'")
 
 
-def create_employees_table():
+def create_employees_table(db_name='garden'):
     '''Конструктор таблицы сотрудников для garden'''
-    with create_connection('garden') as conn:
+    with create_connection(db_name) as conn:
         if conn:
             try:
                 with MySQLCursorManager(conn) as cur:
@@ -109,14 +113,14 @@ def create_employees_table():
                                     fullname VARCHAR(255),
                                     post VARCHAR(255)
                                     )''')
-                    print("Table 'employees' created successfully")
+                    print(f"Table 'employees' in database '{db_name}' created successfully")
             except Error as e:
                 print(f"Error: '{e}'")
 
 
-def create_gardens_table():
+def create_gardens_table(db_name='garden'):
     '''Конструктор таблицы садов для garden'''
-    with create_connection('garden') as conn:
+    with create_connection(db_name) as conn:
         if conn:
             try:
                 with MySQLCursorManager(conn) as cur:
@@ -124,14 +128,14 @@ def create_gardens_table():
                                     id INT AUTO_INCREMENT PRIMARY KEY,
                                     name VARCHAR(255)
                                     )''')
-                    print("Table 'gardens' created successfully")
+                    print(f"Table 'gardens' in database '{db_name}' created successfully")
             except Error as e:
                 print(f"Error: '{e}'")
 
 
-def create_actions_table():
+def create_actions_table(db_name='garden'):
     '''Конструктор таблицы действий для garden'''
-    with create_connection('garden') as conn:
+    with create_connection(db_name) as conn:
         if conn:
             try:
                 with MySQLCursorManager(conn) as cur:
@@ -139,24 +143,63 @@ def create_actions_table():
                                     id INT AUTO_INCREMENT PRIMARY KEY,
                                     name VARCHAR(255)
                                     )''')
-                    print("Table 'actions' created successfully")
+                    print(f"Table 'actions' in database '{db_name}' created successfully")
             except Error as e:
                 print(f"Error: '{e}'")
 
 
-def create_garden_db():
-    '''Создаёт базу данных garden с таблицами: удобрения, культуры, сотрудники, сады, действия'''
-    create_database('garden')
-    create_fertilizers_table()
-    create_crops_table()
-    create_employees_table()
-    create_gardens_table()
-    create_actions_table()
+def create_beds_table(db_name='garden'):
+    '''Конструктор таблицы грядок для garden'''
+    with create_connection(db_name) as conn:
+        if conn:
+            try:
+                with MySQLCursorManager(conn) as cur:
+                    cur.execute('''CREATE TABLE IF NOT EXISTS beds (
+                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                    garden_id INT,
+                                    crop_id INT,
+                                    fertilizer_id INT,
+                                    FOREIGN KEY (garden_id) REFERENCES gardens(id),
+                                    FOREIGN KEY (crop_id) REFERENCES crops(id),
+                                    FOREIGN KEY (fertilizer_id) REFERENCES fertilizers(id)
+                                    )''')
+                    print(f"Table 'beds' in database '{db_name}' created successfully")
+            except mysql.connector.Error as e:
+                print(f"Error creating table 'beds' in database '{db_name}': {e}")
+
+
+def create_garden_employee_table(db_name='garden'):
+    '''Конструктор таблицы связи Сады_Сотрудники для garden'''
+    with create_connection(db_name) as conn:
+        if conn:
+            try:
+                with MySQLCursorManager(conn) as cur:
+                    cur.execute('''CREATE TABLE IF NOT EXISTS garden_employees (
+                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                    garden_id INT,
+                                    employee_id INT,
+                                    FOREIGN KEY (garden_id) REFERENCES gardens(id),
+                                    FOREIGN KEY (employee_id) REFERENCES employees(id)
+                                    )''')
+                    print(f"Table 'garden_employee' in database '{db_name}' created successfully")
+            except mysql.connector.Error as e:
+                print(f"Error creating table 'garden_employee' in database '{db_name}': {e}")
+
+def create_garden_db(dbname='garden'):
+    '''Создаёт базу данных garden с таблицами: удобрения, культуры, сотрудники, сады, действия, грядки и связи Сады_Сотрудники'''
+    create_database(dbname)
+    create_fertilizers_table(dbname)
+    create_crops_table(dbname)
+    create_employees_table(dbname)
+    create_gardens_table(dbname)
+    create_actions_table(dbname)
+    create_beds_table(dbname)
+    create_garden_employee_table(dbname)
 
 
 def clear_tables():
     '''Очищает все данные из таблиц в БД'''
-    tables = ['fertilizers', 'crops', 'employees', 'gardens', 'actions']
+    tables = ['beds', 'garden_employees', 'fertilizers', 'crops', 'employees', 'gardens', 'actions']
 
     with create_connection('garden') as conn:
         if conn:
@@ -167,7 +210,6 @@ def clear_tables():
                         print(f"Table {table} cleared successfully.")
             except mysql.connector.Error as e:
                 print(f"Error clearing table {table}: {e}")
-
 
 def copy_tables(source_db, target_db):
     '''Копирует схемы таблиц из source_db в target_db'''
@@ -325,12 +367,10 @@ def populate_garden_db(database, n):
     populate_actions_table(database, n)
 
 
-def show_database_info(database=None):
+def show_database_info(database='garden'):
     host = 'localhost'
     user = 'admin'
     password = 'root'
-    if database is None:
-        database = 'garden'
 
     try:
         # Подключение к базе данных
@@ -383,25 +423,127 @@ def execute_query(query):
                 return None
 
 
-def drop_tables():
-    tables = ['fertilizers', 'fertilizer', 'crops', 'crop', 'gardenemployee', 'gardens_employees',
-              'employees', 'employee', 'gardens', 'garden', 'actions', 'action', 'garden_employee']
+def drop_tables(db_name='garden'):
+
     drop_table_query = "DROP TABLE IF EXISTS {}"
 
-    with create_connection('garden') as conn:
+    with create_connection(db_name) as conn:
         if conn:
             try:
                 with MySQLCursorManager(conn) as cursor:
-                    for table in tables:
-                        cursor.execute(drop_table_query.format(table))
-                        print(f"Table '{table}' dropped successfully")
-            except Error as e:
+                    # Disable foreign key checks temporarily
+                    cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+
+                    # Drop tables in the correct order to avoid foreign key constraints errors
+                    tables_to_drop = ['beds', 'fertilizers', 'crops', 'employees', 'gardens', 'actions', 'garden_employees']
+
+                    for table in tables_to_drop:
+                        try:
+                            cursor.execute(drop_table_query.format(table))
+                            print(f"Table '{table}' dropped successfully")
+                        except mysql.connector.Error as e:
+                            print(f"Error dropping table '{table}': {e}")
+
+                    # Enable foreign key checks back
+                    cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+
+            except mysql.connector.Error as e:
                 print(f"Error: '{e}'")
 
 
-# Пример использования
+def create_backup(host='localhost', user='admin', password='root', database='garden', backup_path='./backups'):
+    """Создает бэкап базы данных MySQL."""
+    try:
+        # Создаем путь для сохранения бэкапа
+        os.makedirs(backup_path, exist_ok=True)
+
+        # Генерируем имя файла бэкапа на основе текущей даты и времени
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        backup_file = f'{database}_backup_{timestamp}.sql'
+        backup_file_path = os.path.join(backup_path, backup_file)
+
+        # Устанавливаем соединение с базой данных
+        with mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database,
+                charset='utf8mb4',  # Установим кодировку UTF-8
+                collation='utf8mb4_unicode_ci'
+        ) as connection:
+            if connection.is_connected():
+                with connection.cursor() as cursor:
+                    # Открываем файл для записи бэкапа
+                    with open(backup_file_path, 'w', encoding='utf-8') as f:
+                        for table in ['fertilizers', 'crops', 'employees', 'gardens', 'actions', 'beds', 'garden_employees']:
+                            # Получаем данные из таблицы и записываем их в файл
+                            cursor.execute(f"SELECT * FROM {table}")
+                            rows = cursor.fetchall()
+                            f.write(f"-- Table: {table}\n")
+                            for row in rows:
+                                f.write(str(row) + '\n')
+                            f.write('\n')
+
+                    print(f'Backup created successfully: {backup_file_path}')
+
+    except Error as e:
+        print(f'Error creating backup: {e}')
+
+
+def restore_backup(backup_file_path, host='localhost', user='admin', password='root', target_database='garden_backup_test'):
+    try:
+        # Подключение к MySQL
+        connection = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=target_database  # Используем целевую базу данных для восстановления
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            # Чтение содержимого бэкапа
+            with open(backup_file_path, 'rb') as backup_file:
+                content = backup_file.read().decode('utf-8', errors='ignore')
+
+                # Разделение содержимого на отдельные блоки таблиц
+                table_blocks = content.split('-- Table: ')
+
+                for block in table_blocks[1:]:  # Начинаем с 1, чтобы пропустить первый пустой элемент
+                    lines = block.strip().splitlines()
+
+                    table_name = lines[0].strip()  # Название таблицы
+                    values = [line.strip('()') for line in lines[1:] if line.startswith('(')]
+
+                    # Вставка данных в таблицу
+                    if values:
+                        insert_query = f"INSERT INTO {table_name} VALUES ({'), ('.join(values)}) ON DUPLICATE KEY UPDATE id=id;"
+                        try:
+                            cursor.execute(insert_query)
+                        except mysql.connector.Error as e:
+                            print(f"Error executing SQL command: {e}")
+
+            # Фиксация изменений и закрытие соединения
+            connection.commit()
+            cursor.close()
+            connection.close()
+
+            print(f'Backup restored successfully from: {backup_file_path} to database: {target_database}')
+
+    except mysql.connector.Error as e:
+        print(f'Error restoring backup: {e}')
+
+
 if __name__ == '__main__':
     # drop_tables()
-    create_garden_db()
-    clear_tables()
-    show_database_info()
+    # create_garden_db()
+    # clear_tables()
+    # show_database_info()
+
+    # create_backup()
+    test_db_name = 'garden_backup_test'
+    drop_tables(test_db_name)
+    create_garden_db(test_db_name)
+    restore_backup(backup_file_path='backups/garden_backup_2024-06-18_16-43-49.sql', target_database=test_db_name)
+    show_database_info(test_db_name)

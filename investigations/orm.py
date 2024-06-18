@@ -472,6 +472,43 @@ class Bed:
                     print(f"The error '{e}' occurred")
 
 
+class GardenEmployee:
+    def __init__(self, garden_id, employee_id):
+        self.garden_id = garden_id
+        self.employee_id = employee_id
+
+    @staticmethod
+    def create_table():
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            CREATE TABLE IF NOT EXISTS garden_employees (
+                                id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                                garden_id INTEGER,
+                                employee_id INTEGER,
+                                FOREIGN KEY (garden_id) REFERENCES gardens (id),
+                                FOREIGN KEY (employee_id) REFERENCES employees (id)
+                            )
+                        """)
+                        connection.commit()
+                        print("Table 'garden_employees' created successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
+
+    def save(self):
+        query = "INSERT INTO garden_employees (garden_id, employee_id) VALUES (%s, %s)"
+        values = (self.garden_id, self.employee_id)
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(query, values)
+                        connection.commit()
+                        print("Garden-Employee relation saved successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
 
 
 def generate(model, n):
@@ -540,5 +577,11 @@ if __name__ == '__main__':
     for bed_params in beds:
         bed = Bed(*bed_params)
         bed.save()
+
+    GardenEmployee.create_table()
+    garden_employees = generator_random_garden_employee(10)
+    for ge_params in garden_employees:
+        ge = GardenEmployee(*ge_params)
+        ge.save()
 
     show_database_content()
