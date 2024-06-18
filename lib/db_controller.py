@@ -304,6 +304,7 @@ def insert_into_employees(database, employees):
 
 def insert_into_gardens(database, gardens):
     '''Вставляет данные в таблицу gardens'''
+    gardens = [(name,) for name in gardens]  # Преобразуем список строк в список кортежей
     with create_connection(database) as conn:
         if conn:
             try:
@@ -314,9 +315,9 @@ def insert_into_gardens(database, gardens):
             except Error as e:
                 print(f"Error: '{e}'")
 
-
 def insert_into_actions(database, actions):
     '''Вставляет данные в таблицу actions'''
+    actions = [(name,) for name in actions]  # Преобразуем список строк в список кортежей
     with create_connection(database) as conn:
         if conn:
             try:
@@ -324,6 +325,18 @@ def insert_into_actions(database, actions):
                     insert_query = "INSERT INTO actions (name) VALUES (%s)"
                     cursor.executemany(insert_query, actions)
                     print(f"{cursor.rowcount} rows inserted into actions")
+            except Error as e:
+                print(f"Error: '{e}'")
+
+def insert_into_beds(database, beds):
+    '''Вставляет данные в таблицу beds'''
+    with create_connection(database) as conn:
+        if conn:
+            try:
+                with MySQLCursorManager(conn) as cursor:
+                    insert_query = "INSERT INTO beds (garden_id, crop_id, fertilizer_id) VALUES (%s, %s, %s)"
+                    cursor.executemany(insert_query, beds)
+                    print(f"{cursor.rowcount} rows inserted into beds")
             except Error as e:
                 print(f"Error: '{e}'")
 
@@ -538,12 +551,13 @@ def restore_backup(backup_file_path, host='localhost', user='admin', password='r
 if __name__ == '__main__':
     # drop_tables()
     # create_garden_db()
-    # clear_tables()
-    # show_database_info()
+    clear_tables()
+    show_database_info()
 
     # create_backup()
-    test_db_name = 'garden_backup_test'
-    drop_tables(test_db_name)
-    create_garden_db(test_db_name)
-    restore_backup(backup_file_path='backups/garden_backup_2024-06-18_16-43-49.sql', target_database=test_db_name)
-    show_database_info(test_db_name)
+    # test_db_name = 'garden_backup_test'
+    # drop_tables(test_db_name)
+    # create_garden_db(test_db_name)
+    # restore_backup(backup_file_path='backups/garden_backup_2024-06-18_16-43-49.sql', target_database=test_db_name)
+    # show_database_info(test_db_name)
+    pass

@@ -109,3 +109,5 @@ def generator_random_garden_employee(num_instances):
 
             except Error as e:
                 print(f"The error '{e}' occurred")
+
+print(generator_random_action(5))
