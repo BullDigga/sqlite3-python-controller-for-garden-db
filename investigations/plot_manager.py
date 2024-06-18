@@ -1,7 +1,13 @@
+"""
+Модуль: plot_manager
+
+Этот модуль предоставляет собой функции для исследований и построений графиков
+"""
+
 import matplotlib.pyplot as plt
 import timeit
-import random
-from lib.generators import *  # Импортируйте функцию генерации случайных строк из вашего модуля
+
+from lib.generators import *
 from db_manager import measure_query_time, show_database_content, measure_delete_time
 from lib.db_controller import *
 
@@ -66,6 +72,7 @@ def plot_generation_graphics(funcs_to_measure, count_generation, title='Граф
     plot_data(n_values, [func_times[func_name] for func_name in labels], labels,
               'Количество генерируемых элементов', 'Время генерации (секунды)',
               title, save_path='generation_times.png')
+
 
 def measure_generation_time(func, num_instances):
     """

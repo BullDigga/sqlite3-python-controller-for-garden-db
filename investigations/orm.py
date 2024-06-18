@@ -1,12 +1,12 @@
-import sys
-import os
-from mysql.connector import Error
-from lib.db_controller import create_connection, MySQLCursorManager
-from lib.randomik import *
+"""
+Модуль: orm
+
+Этот модуль предоставляет собой orm для работы с БД на MySQL
+"""
+
+from lib.db_controller import MySQLCursorManager
 from lib.generators import *
 from db_manager import show_database_content
-
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 class Field:
@@ -16,12 +16,39 @@ class Field:
     Атрибуты
     --------
     column_type : str
-        тип данных колонки
-    primary_key : bool
-        указывает, является ли поле первичным ключом (по умолчанию False)
+        Тип данных колонки.
+    primary_key : bool, optional
+        Указывает, является ли поле первичным ключом (по умолчанию False).
+
+    Методы
+    ------
+    __init__(self, column_type, primary_key=False)
+        Конструктор класса Field.
+
+    Параметры
+    ----------
+    column_type : str
+        Тип данных для колонки.
+    primary_key : bool, optional
+        Флаг, указывающий, является ли поле первичным ключом (по умолчанию False).
+
+    Пример
+    -------
+    Создание поля для колонки с типом 'INTEGER':
+    field = Field('INTEGER', primary_key=True)
     """
 
     def __init__(self, column_type, primary_key=False):
+        """
+        Инициализирует объект класса Field.
+
+        Параметры
+        ----------
+        column_type : str
+            Тип данных для колонки.
+        primary_key : bool, optional
+            Флаг, указывающий, является ли поле первичным ключом (по умолчанию False).
+        """
         self.column_type = column_type
         self.primary_key = primary_key
 
@@ -202,6 +229,7 @@ class Model(metaclass=ModelMeta):
                 except Error as e:
                     print(f"Ошибка: '{e}'")
 
+
     @classmethod
     def get(cls, **kwargs):
         """
@@ -240,20 +268,49 @@ class Fertilizer(Model):
 
     Наследуется от Model.
 
-    :Attributes:
-        id: IntegerField
-            первичный ключ удобрения
-        name: StringField
-            название удобрения
-        amount: IntegerField
-            количество доступного удобрения
+    Атрибуты
+    --------
+    id : IntegerField
+        Первичный ключ удобрения.
+    name : StringField
+        Название удобрения.
+    amount : IntegerField
+        Количество доступного удобрения.
+
+    Методы
+    ------
+    __init__(self, name=None, amount=None)
+        Конструктор класса Fertilizer.
+
+        Параметры:
+        ----------
+        name : str, optional
+            Название удобрения.
+        amount : int, optional
+            Количество доступного удобрения.
+
+    save(self)
+        Сохраняет текущий объект удобрения в базу данных.
     """
 
     def __init__(self, name=None, amount=None):
+        """
+        Конструктор класса Fertilizer.
+
+        Parameters
+        ----------
+        name : str, optional
+            Название удобрения.
+        amount : int, optional
+            Количество доступного удобрения.
+        """
         self.name = name
         self.amount = amount
 
     def save(self):
+        """
+        Сохраняет текущий объект удобрения в базу данных.
+        """
         query = "INSERT INTO fertilizers (name, amount) VALUES (%s, %s)"
         values = (self.name, self.amount)
         with create_connection('garden') as connection:
@@ -271,20 +328,53 @@ class Crop(Model):
     """
     Класс, представляющий культуру.
 
-    :Attributes:
-        id: IntegerField
-            первичный ключ культуры
-        name: StringField
-            название культуры
-        season: StringField
-            сезон выращивания культуры
-        watering_frequency: IntegerField
-            частота полива культуры
-        ripening_period: IntegerField
-            срок созревания культуры
+    Наследуется от Model.
+
+    Атрибуты
+    --------
+    id : IntegerField
+        Первичный ключ культуры.
+    name : StringField
+        Название культуры.
+    season : StringField
+        Сезон выращивания культуры.
+    watering_frequency : IntegerField
+        Частота полива культуры.
+    ripening_period : IntegerField
+        Срок созревания культуры.
+
+    Методы
+    ------
+    __init__(self, name=None, season=None, watering_frequency=None, ripening_period=None)
+        Конструктор класса Crop.
+
+        Параметры:
+        ----------
+        name : str, optional
+            Название культуры.
+        season : str, optional
+            Сезон выращивания культуры.
+        watering_frequency : int, optional
+            Частота полива культуры.
+        ripening_period : int, optional
+            Срок созревания культуры.
     """
 
     def __init__(self, name=None, season=None, watering_frequency=None, ripening_period=None):
+        """
+        Конструктор класса Crop.
+
+        Parameters
+        ----------
+        name : str, optional
+            Название культуры.
+        season : str, optional
+            Сезон выращивания культуры.
+        watering_frequency : int, optional
+            Частота полива культуры.
+        ripening_period : int, optional
+            Срок созревания культуры.
+        """
         self.name = name
         self.season = season
         self.watering_frequency = watering_frequency
@@ -344,20 +434,54 @@ class Employee(Model):
     """
     Класс, представляющий сотрудника.
 
-    :Attributes:
-        id: IntegerField
-            первичный ключ сотрудника
-        fullname: StringField
-            полное имя сотрудника
-        post: StringField
-            должность сотрудника
+    Наследуется от Model.
+
+    Атрибуты
+    --------
+    id : IntegerField
+        Первичный ключ сотрудника.
+    fullname : StringField
+        Полное имя сотрудника.
+    post : StringField
+        Должность сотрудника.
+
+    Методы
+    ------
+    __init__(self, fullname=None, post=None)
+        Конструктор класса Employee.
+
+        Параметры:
+        ----------
+        fullname : str, optional
+            Полное имя сотрудника.
+        post : str, optional
+            Должность сотрудника.
+
+    save(self)
+        Сохраняет текущий объект 'Employee' в базу данных 'garden'.
+        Если объект уже существует в базе данных, он будет обновлен.
     """
 
     def __init__(self, fullname=None, post=None):
+        """
+        Конструктор класса Employee.
+
+        Parameters
+        ----------
+        fullname : str, optional
+            Полное имя сотрудника.
+        post : str, optional
+            Должность сотрудника.
+        """
         self.fullname = fullname
         self.post = post
 
     def save(self):
+        """
+        Сохраняет текущий объект 'Employee' в базу данных 'garden'.
+
+        Если объект уже существует в базе данных, он будет обновлен.
+        """
         query = "INSERT INTO employees (fullname, post) VALUES (%s, %s)"
         values = (self.fullname, self.post)
         with create_connection('garden') as connection:
@@ -377,17 +501,45 @@ class Garden(Model):
 
     Наследуется от Model.
 
-    :Attributes:
-        id: IntegerField
-            первичный ключ сада
-        name: StringField
-            название сада
+    Атрибуты
+    --------
+    id : IntegerField
+        Первичный ключ сада.
+    name : StringField
+        Название сада.
+
+    Методы
+    ------
+    __init__(self, name=None)
+        Конструктор класса Garden.
+
+        Параметры:
+        ----------
+        name : str, optional
+            Название сада.
+
+    save(self)
+        Сохраняет текущий объект 'Garden' в базу данных 'garden'.
+        Если объект уже существует в базе данных, он будет обновлен.
     """
 
     def __init__(self, name=None):
+        """
+        Конструктор класса Garden.
+
+        Parameters
+        ----------
+        name : str, optional
+            Название сада.
+        """
         self.name = name
 
     def save(self):
+        """
+        Сохраняет текущий объект 'Garden' в базу данных 'garden'.
+
+        Если объект уже существует в базе данных, он будет обновлен.
+        """
         query = "INSERT INTO gardens (name) VALUES (%s)"
         values = (self.name,)
         with create_connection('garden') as connection:
@@ -400,23 +552,52 @@ class Garden(Model):
                 except Error as e:
                     print(f"The error '{e}' occurred")
 
+
 class Action(Model):
     """
     Класс, представляющий действие в саду.
 
     Наследуется от Model.
 
-    :Attributes:
-        id: IntegerField
-            первичный ключ действия
-        name: StringField
-            описание действия
+    Атрибуты
+    --------
+    id : IntegerField
+        Первичный ключ действия.
+    name : StringField
+        Описание действия.
+
+    Методы
+    ------
+    __init__(self, name=None)
+        Конструктор класса Action.
+
+        Параметры:
+        ----------
+        name : str, optional
+            Описание действия.
+
+    save(self)
+        Сохраняет текущий объект 'Action' в базу данных 'garden'.
+        Если объект уже существует в базе данных, он будет обновлен.
     """
 
     def __init__(self, name=None):
+        """
+        Конструктор класса Action.
+
+        Parameters
+        ----------
+        name : str, optional
+            Описание действия.
+        """
         self.name = name
 
     def save(self):
+        """
+        Сохраняет текущий объект 'Action' в базу данных 'garden'.
+
+        Если объект уже существует в базе данных, он будет обновлен.
+        """
         query = "INSERT INTO actions (name) VALUES (%s)"
         values = (self.name,)
         with create_connection('garden') as connection:
@@ -431,13 +612,53 @@ class Action(Model):
 
 
 class Bed:
+    """
+    Класс, представляющий грядку в базе данных.
+
+    Атрибуты
+    --------
+    garden_id : int
+        ID сада, к которому относится грядка.
+    crop_id : int
+        ID культуры, выращиваемой на грядке.
+    fertilizer_id : int
+        ID удобрения, применяемого на грядке.
+
+    Методы
+    ------
+    create_table()
+        Статический метод для создания таблицы 'beds' в базе данных 'garden'.
+        Если таблица уже существует, она не будет пересоздана.
+
+    save()
+        Сохраняет текущий объект 'Bed' в базу данных 'garden'.
+        Если объект уже существует в базе данных, он будет обновлен.
+    """
+
     def __init__(self, garden_id, crop_id, fertilizer_id):
+        """
+        Конструктор класса Bed.
+
+        Parameters:
+        -----------
+        garden_id : int
+            ID сада, к которому относится грядка.
+        crop_id : int
+            ID культуры, выращиваемой на грядке.
+        fertilizer_id : int
+            ID удобрения, применяемого на грядке.
+        """
         self.garden_id = garden_id
         self.crop_id = crop_id
         self.fertilizer_id = fertilizer_id
 
     @staticmethod
     def create_table():
+        """
+        Статический метод для создания таблицы 'beds' в базе данных 'garden'.
+
+        Если таблица уже существует, она не будет пересоздана.
+        """
         with create_connection('garden') as connection:
             if connection:
                 try:
@@ -459,6 +680,11 @@ class Bed:
                     print(f"The error '{e}' occurred")
 
     def save(self):
+        """
+        Сохраняет текущий объект 'Bed' в базу данных 'garden'.
+
+        Если объект уже существует в базе данных, он будет обновлен.
+        """
         query = "INSERT INTO beds (garden_id, crop_id, fertilizer_id) VALUES (%s, %s, %s)"
         values = (self.garden_id, self.crop_id, self.fertilizer_id)
         with create_connection('garden') as connection:
@@ -472,13 +698,51 @@ class Bed:
                     print(f"The error '{e}' occurred")
 
 
+
 class GardenEmployee:
+    """
+    Класс, представляющий отношение "Сад-Сотрудник" в базе данных.
+
+    Атрибуты
+    --------
+    garden_id : int
+        ID сада.
+    employee_id : int
+        ID сотрудника.
+
+    Методы
+    ------
+    create_table()
+        Статический метод для создания таблицы 'garden_employees' в базе данных 'garden'.
+        Если таблица уже существует, она не будет пересоздана.
+
+    save()
+        Сохраняет текущий объект 'GardenEmployee' в базу данных 'garden'.
+        Если объект уже существует в базе данных, он будет обновлен.
+
+    """
+
     def __init__(self, garden_id, employee_id):
+        """
+        Конструктор класса GardenEmployee.
+
+        Parameters:
+        -----------
+        garden_id : int
+            ID сада.
+        employee_id : int
+            ID сотрудника.
+        """
         self.garden_id = garden_id
         self.employee_id = employee_id
 
     @staticmethod
     def create_table():
+        """
+        Статический метод для создания таблицы 'garden_employees' в базе данных 'garden'.
+
+        Если таблица уже существует, она не будет пересоздана.
+        """
         with create_connection('garden') as connection:
             if connection:
                 try:
@@ -498,6 +762,11 @@ class GardenEmployee:
                     print(f"The error '{e}' occurred")
 
     def save(self):
+        """
+        Сохраняет текущий объект 'GardenEmployee' в базу данных 'garden'.
+
+        Если объект уже существует в базе данных, он будет обновлен.
+        """
         query = "INSERT INTO garden_employees (garden_id, employee_id) VALUES (%s, %s)"
         values = (self.garden_id, self.employee_id)
         with create_connection('garden') as connection:
@@ -509,6 +778,7 @@ class GardenEmployee:
                         print("Garden-Employee relation saved successfully")
                 except Error as e:
                     print(f"The error '{e}' occurred")
+
 
 
 def generate(model, n):
