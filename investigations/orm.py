@@ -429,6 +429,51 @@ class Action(Model):
                 except Error as e:
                     print(f"The error '{e}' occurred")
 
+
+class Bed:
+    def __init__(self, garden_id, crop_id, fertilizer_id):
+        self.garden_id = garden_id
+        self.crop_id = crop_id
+        self.fertilizer_id = fertilizer_id
+
+    @staticmethod
+    def create_table():
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            CREATE TABLE IF NOT EXISTS beds (
+                                id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                                garden_id INTEGER,
+                                crop_id INTEGER,
+                                fertilizer_id INTEGER,
+                                FOREIGN KEY (garden_id) REFERENCES gardens (id),
+                                FOREIGN KEY (crop_id) REFERENCES crops (id),
+                                FOREIGN KEY (fertilizer_id) REFERENCES fertilizers (id)
+                            )
+                        """)
+                        connection.commit()
+                        print("Table 'beds' created successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
+
+    def save(self):
+        query = "INSERT INTO beds (garden_id, crop_id, fertilizer_id) VALUES (%s, %s, %s)"
+        values = (self.garden_id, self.crop_id, self.fertilizer_id)
+        with create_connection('garden') as connection:
+            if connection:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(query, values)
+                        connection.commit()
+                        print("Bed saved successfully")
+                except Error as e:
+                    print(f"The error '{e}' occurred")
+
+
+
+
 def generate(model, n):
     """
     Генерирует n экземпляров заданного класса model.
@@ -489,5 +534,11 @@ if __name__ == '__main__':
     for employee_params in employees:
         employee = Employee(*employee_params)
         employee.save()
+
+    Bed.create_table()
+    beds = generator_random_bed(10)
+    for bed_params in beds:
+        bed = Bed(*bed_params)
+        bed.save()
 
     show_database_content()
