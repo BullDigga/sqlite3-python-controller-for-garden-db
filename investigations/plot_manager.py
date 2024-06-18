@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import timeit
 import random
 from lib.generators import *  # Импортируйте функцию генерации случайных строк из вашего модуля
-from db_manager import measure_query_time, show_database_content
+from db_manager import measure_query_time, show_database_content, measure_delete_time
 from lib.db_controller import *
 
 
@@ -241,6 +241,42 @@ def plot_insert_graphics(insert_funcs, data_generators, count_rows, title='По�
     plot_data(count_rows, transposed_results, [name for _, name in insert_funcs], 'Количество строк', 'Время выполнения (секунды)', title)
 
 
+def plot_delete_graphics(delete_funcs, count_rows, title='Построение графиков с запросами DELETE'):
+    """
+    Функция для построения графиков времени выполнения запросов DELETE.
+
+    Parameters:
+    delete_funcs : list of tuples
+        Список кортежей, каждый кортеж содержит функцию удаления данных и её имя.
+    count_rows : list of int
+        Список значений количества строк для вставки.
+    title : str
+        Заголовок графика.
+
+    Returns:
+    None
+    """
+    results = []
+
+    for count in count_rows:
+        # Генерация данных перед выполнением удаления
+        clear_tables()
+        generate_data_for_table('gardens', count)
+        generate_data_for_table('crops', count)
+        generate_data_for_table('fertilizers', count)
+
+        times = []
+        for delete_func, func_name in delete_funcs:
+            time_taken = measure_delete_time(delete_func, 'garden')
+            times.append(time_taken)
+        results.append(times)
+
+    # Транспонируем результаты для корректного отображения на графике
+    transposed_results = list(map(list, zip(*results)))
+
+    plot_data(count_rows, transposed_results, [name for _, name in delete_funcs], 'Количество строк', 'Время выполнения (секунды)', title)
+
+
 if __name__ == '__main__':
 
     count_generation = 300
@@ -286,3 +322,13 @@ if __name__ == '__main__':
     # plot_insert_graphics(insert_funcs, data_generators, count_rows, title='Время выполнения запросов INSERT')
     #
     # show_database_info()
+
+    delete_funcs = [
+        (delete_from_gardens, 'delete_from_gardens'),
+        (delete_from_crops, 'delete_from_crops'),
+        (delete_from_fertilizers, 'delete_from_fertilizers')
+    ]
+
+    count_rows = [50, 100, 150, 200]
+
+    plot_delete_graphics(delete_funcs, count_rows, title='Время выполнения запросов DELETE')

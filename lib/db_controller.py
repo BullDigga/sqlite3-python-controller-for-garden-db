@@ -548,6 +548,43 @@ def restore_backup(backup_file_path, host='localhost', user='admin', password='r
         print(f'Error restoring backup: {e}')
 
 
+def delete_from_gardens(database):
+    '''Удаляет данные из таблицы gardens'''
+    with create_connection(database) as conn:
+        if conn:
+            try:
+                with MySQLCursorManager(conn) as cursor:
+                    delete_query = "DELETE FROM gardens"
+                    cursor.execute(delete_query)
+                    print(f"{cursor.rowcount} rows deleted from gardens")
+            except Error as e:
+                print(f"Error: '{e}'")
+
+def delete_from_crops(database):
+    '''Удаляет данные из таблицы crops'''
+    with create_connection(database) as conn:
+        if conn:
+            try:
+                with MySQLCursorManager(conn) as cursor:
+                    delete_query = "DELETE FROM crops"
+                    cursor.execute(delete_query)
+                    print(f"{cursor.rowcount} rows deleted from crops")
+            except Error as e:
+                print(f"Error: '{e}'")
+
+def delete_from_fertilizers(database):
+    '''Удаляет данные из таблицы fertilizers'''
+    with create_connection(database) as conn:
+        if conn:
+            try:
+                with MySQLCursorManager(conn) as cursor:
+                    delete_query = "DELETE FROM fertilizers"
+                    cursor.execute(delete_query)
+                    print(f"{cursor.rowcount} rows deleted from fertilizers")
+            except Error as e:
+                print(f"Error: '{e}'")
+
+
 if __name__ == '__main__':
     # drop_tables()
     # create_garden_db()
